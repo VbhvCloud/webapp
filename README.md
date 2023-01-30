@@ -1,10 +1,26 @@
-# webapp
+# Webapp
 
-Project for network structure and cloud computing
+This is a Django based RESTful API for managing user data. It includes APIs for registration, login, and user details retrieval and update.
 
-License: MIT
 
-## Basic Commands
+### Requirements
+- Python 3.x
+- Django 3.x
+- Django REST framework
+
+### Installation
+1. Clone the repository to your local machine and cd into webapp.
+2. Create a virtual environment in the project directory.
+3. Activate the virtual environment.
+4. Install the required packages using the following command:
+```bash
+pip install -r requirements/local.txt
+```
+5. Export the database configurations to the environment.
+```bash
+source .venv
+```
+> **_NOTE:_**  Update the .venv file in the root folder to set the database configurations.
 
 ### Setting Up Your Users
 
@@ -12,32 +28,29 @@ License: MIT
 
       $ python manage.py createsuperuser
 
-For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar),
-so that you can see how the site behaves for both kinds of users.
+### Run Django server
+- Migrate all the migration files into the database.
 
-### Type checks
+      $ python manage.py migrate
+- Run server
 
-Running type checks with mypy:
+      $ python manage.py runserver
 
-    $ mypy webapp
+### Running tests with django
 
-### Test coverage
+    $ python manage.py test
 
-To run the tests, check your test coverage, and generate an HTML coverage report:
+### Usage
+The API has the following endpoints:
 
-    $ coverage run -m pytest
-    $ coverage html
-    $ open htmlcov/index.html
+1. Register user: /register/ (POST)
+2. Login: /login/ (POST)
+3. User details: /users/ (GET, PUT)
 
-#### Running tests with pytest
+You can test the API using any REST client such as Postman.
 
-    $ pytest
+### Note
+The API uses basic authentication for accessing user details. A token is generated during login, which can be used to access the user details.
 
-### Live reloading and Sass CSS compilation
-
-Moved
-to [Live reloading and SASS compilation](https://cookiecutter-django.readthedocs.io/en/latest/developing-locally.html#sass-compilation-live-reloading).
-
-## Deployment
-
-The following details how to deploy this application.
+### License
+This project is licensed under the MIT License.
