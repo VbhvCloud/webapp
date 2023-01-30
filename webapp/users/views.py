@@ -5,9 +5,6 @@ import logging
 # Django imports
 from django.contrib.auth import authenticate
 from django.db import transaction
-from drf_yasg import openapi
-from drf_yasg.openapi import Parameter
-from drf_yasg.utils import swagger_auto_schema
 
 # Rest framework Imports
 from rest_framework import status, generics
