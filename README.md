@@ -16,11 +16,11 @@ This is a Django based RESTful API for managing user data. It includes APIs for 
 ```bash
 pip install -r requirements/local.txt
 ```
-5. Export the database configurations to the environment.
+5. Export the database configurations to the environment. 
 ```bash
-source .venv
+export DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 ```
-> **_NOTE:_**  Update the .venv file in the root folder to set the database configurations.
+> **_NOTE:_**  replace the POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB with your database configurations.
 
 ### Setting Up Your Users
 
