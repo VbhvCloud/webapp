@@ -40,7 +40,6 @@ class RegisterUser(generics.CreateAPIView):
     @swagger_auto_schema(tags=['Public'], operation_summary="Create a new user account",
                          responses={201: openapi.Response("Successful creation of user with the returned user "
                                                           "information", CreateSwaggerSerializer),
-                                    409: "If the email provided is already registered",
                                     400: "If the data provided in the request is invalid",
                                     408: "If a timeout error occurs"})
     def post(self, request, *args, **kwargs):
@@ -76,7 +75,7 @@ class Login(generics.GenericAPIView):
     @staticmethod
     @swagger_auto_schema(tags=['Public'], operation_summary="Login User",
                          responses={200: openapi.Response("Successful login", LoginSwaggerSerializer),
-                                    409: "If the email provided is already registered",
+                                    400: "If the data provided in the request is invalid",
                                     401: "If the User is unauthorized to login",
                                     408: "If a timeout error occurs"}
                          )
