@@ -105,7 +105,7 @@ class GetUpdateUserAPITestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.factory = APIRequestFactory()
-        self.client.post(
+        self.owner = self.client.post(
             reverse('users:register'),
             data=json.dumps({
                 'first_name': 'testuser',
@@ -142,7 +142,7 @@ class GetUpdateUserAPITestCase(TestCase):
 
     def test_get_user(self):
         response = self.client.get(
-            reverse('users:details'),
+            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
             **self.valid_headers,
             content_type='application/json'
         )
@@ -151,7 +151,7 @@ class GetUpdateUserAPITestCase(TestCase):
 
     def test_get_invalid_user(self):
         response = self.client.get(
-            reverse('users:details'),
+            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
             **self.invalid_header,
             content_type='application/json'
         )
@@ -159,7 +159,7 @@ class GetUpdateUserAPITestCase(TestCase):
 
     def test_update_user(self):
         response = self.client.put(
-            reverse('users:details'),
+            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
             data=self.valid_data,
             **self.valid_headers,
             content_type='application/json'
@@ -168,7 +168,7 @@ class GetUpdateUserAPITestCase(TestCase):
 
     def test_invalid_update_user(self):
         response = self.client.put(
-            reverse('users:details'),
+            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
             data=self.invalid_data,
             **self.valid_headers,
             content_type='application/json'

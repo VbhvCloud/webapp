@@ -27,11 +27,11 @@ urlpatterns = [
             name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path("health/", Health.as_view(), name="health"),
+    path("healthz", Health.as_view(), name="health"),
     # Django Admin, use {% url 'admin:index' %}
     # path(settings.ADMIN_URL, admin.site.urls),
     # User management
-    path("v1/users/", include("webapp.users.urls", namespace="users")),
+    path("v1/user/", include("webapp.users.urls", namespace="user")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
