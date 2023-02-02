@@ -30,6 +30,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = ["first_name", "last_name", "password"]
 
+
     @staticmethod
     def validate_password(password) -> str:
         """ A function to save the password for storing the values """
