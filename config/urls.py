@@ -32,6 +32,7 @@ urlpatterns = [
     # path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("v1/user/", include("webapp.users.urls", namespace="user")),
+    path("v1/product/", include("product.urls", namespace="product")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

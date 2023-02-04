@@ -4,6 +4,7 @@ import datetime
 # Django Imports
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.core.validators import MinValueValidator
 from django.db import models
 
 # Project Imports
