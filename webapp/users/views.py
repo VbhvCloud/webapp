@@ -44,14 +44,14 @@ class RegisterUser(generics.CreateAPIView):
                                     408: "If a timeout error occurs"})
     def post(self, request, *args, **kwargs):
         try:
-            if User.objects.filter(email=request.data.get("email")).exists():
-                return response(False, "Email ID already Exists", status.HTTP_400_BAD_REQUEST)
+            if User.objects.filter(username=request.data.get("username")).exists():
+                return response(False, "Username ID already Exists", status.HTTP_400_BAD_REQUEST)
             user = self.get_serializer(data=request.data)
             if user.is_valid():
                 with transaction.atomic():
                     user.save()
-                return_data = User.objects.filter(email=request.data.get("email")) \
-                    .values("id", "first_name", "last_name", "email", "account_created", "account_updated").first()
+                return_data = User.objects.filter(username=request.data.get("username")) \
+                    .values("id", "first_name", "last_name", "username", "account_created", "account_updated").first()
                 return response(True, "User Created Successfully", status.HTTP_201_CREATED, return_data)
             return response(False, user.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -82,25 +82,25 @@ class Login(generics.GenericAPIView):
     def post(request, *args, **kwargs):
         try:
             # check if the request contains necessary data
-            if not request.data.get("email", None) or not request.data.get("password", None):
+            if not request.data.get("username", None) or not request.data.get("password", None):
                 return response(False, "Please provide login credentials", status.HTTP_400_BAD_REQUEST)
 
             # authenticate the user using provided credentials
-            user = authenticate(request, username=request.data.get("email"), password=request.data.get("password"))
+            user = authenticate(request, username=request.data.get("username"), password=request.data.get("password"))
             if user is not None:
 
                 # get user details
-                user_details = User.objects.get(email=user.get_username())
+                user_details = User.objects.get(username=user.get_username())
 
                 # generate token
                 token = base64.b64encode(
-                    f'{request.data.get("email")}:{request.data.get("password")}'.encode()).decode()
+                    f'{request.data.get("username")}:{request.data.get("password")}'.encode()).decode()
 
                 # return response with token and user data
                 return response(True, "Login Successful", status.HTTP_200_OK, data={
                     "first_name": user_details.first_name,
                     "last_name": user_details.last_name,
-                    "email": user_details.email
+                    "username": user_details.username
                 }, headers={
                     "access-token": token
                 })
@@ -145,7 +145,7 @@ class Users(generics.GenericAPIView):
             if not kwargs['userId'] == request.user.id:
                 return response(False, "You are not allowed to get this user", status.HTTP_403_FORBIDDEN)
 
-            user_data = User.objects.filter(id=request.user.id).values("id", "first_name", "last_name", "email",
+            user_data = User.objects.filter(id=request.user.id).values("id", "first_name", "last_name", "username",
                                                                        "account_created", "account_updated")
 
             return response(True, "User data fetched successfully", status.HTTP_200_OK, data=user_data.first())
@@ -180,8 +180,8 @@ class Users(generics.GenericAPIView):
             if user.is_valid(raise_exception=True):
                 with transaction.atomic():
                     user.save()
-                return_data = User.objects.filter(email=request.user.get_username()). \
-                    values("id", "first_name", "last_name", "email", "account_created", "account_updated").first()
+                return_data = User.objects.filter(username=request.user.get_username()). \
+                    values("id", "first_name", "last_name", "username", "account_created", "account_updated").first()
                 return response(True, "User Updated Successfully", status.HTTP_200_OK, return_data)
         except Exception as e:
             return response(False, str(e), status.HTTP_400_BAD_REQUEST)
