@@ -21,12 +21,12 @@ class CreateUserAPITestCase(TestCase):
             'first_name': 'testuser',
             'last_name': 'mahajan',
             'password': 'testpassword',
-            'email': 'testuser@example.com'
+            'username': 'testuser@example.com'
         }
         self.invalid_payload = {
             'first_name': '',
             'password': '',
-            'email': ''
+            'username': ''
         }
 
     def test_create_valid_user(self):
@@ -58,19 +58,19 @@ class LoginAPITestCase(TestCase):
                 'first_name': 'testuser',
                 'last_name': 'mahajan',
                 'password': 'testpassword',
-                'email': 'testuser@example.com'
+                'username': 'testuser@example.com'
             }),
             content_type='application/json'
         )
         self.valid_payload = {
             'password': 'testpassword',
-            'email': 'testuser@example.com'
+            'username': 'testuser@example.com'
         }
         self.invalid_payload = {
-            "email": ""
+            "username": ""
         }
         self.wrong_payload = {
-            "email": "test@test.in",
+            "username": "test@test.in",
             "password": "test"
         }
 
@@ -111,7 +111,7 @@ class GetUpdateUserAPITestCase(TestCase):
                 'first_name': 'testuser',
                 'last_name': 'mahajan',
                 'password': 'testpassword',
-                'email': 'testuser@example.com'
+                'username': 'testuser@example.com'
             }),
             content_type='application/json'
         )
@@ -119,7 +119,7 @@ class GetUpdateUserAPITestCase(TestCase):
             reverse('users:login'),
             data=json.dumps({
                 'password': 'testpassword',
-                'email': 'testuser@example.com'
+                'username': 'testuser@example.com'
             }),
             content_type='application/json'
         )
@@ -147,7 +147,7 @@ class GetUpdateUserAPITestCase(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content.decode())["data"]["email"], 'testuser@example.com')
+        self.assertEqual(json.loads(response.content.decode())["data"]["username"], 'testuser@example.com')
 
     def test_get_invalid_user(self):
         response = self.client.get(

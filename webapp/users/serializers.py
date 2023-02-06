@@ -11,7 +11,7 @@ from .models import User
 class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', "last_name", "email", "password"]
+        fields = ['first_name', "last_name", "username", "password"]
 
     @staticmethod
     def validate_password(password) -> str:
@@ -22,7 +22,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class CreateSwaggerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'first_name', "last_name", "email", "account_created", "account_updated"]
+        fields = ['id', 'first_name', "last_name", "username", "account_created", "account_updated"]
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
@@ -37,11 +37,11 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
+    username = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, write_only=True)
 
 
 class LoginSwaggerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email"]
+        fields = ["first_name", "last_name", "username"]
