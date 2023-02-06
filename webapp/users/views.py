@@ -100,7 +100,8 @@ class Login(generics.GenericAPIView):
                 return response(True, "Login Successful", status.HTTP_200_OK, data={
                     "first_name": user_details.first_name,
                     "last_name": user_details.last_name,
-                    "username": user_details.username
+                    "username": user_details.username,
+                    "access-token": token
                 }, headers={
                     "access-token": token
                 })
