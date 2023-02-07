@@ -1,5 +1,6 @@
 # Rest framework imports
 from rest_framework.response import Response
+from rest_framework.utils.serializer_helpers import ReturnDict
 
 
 def response(status: bool, message: str, status_code: int, data=None, headers=None):
@@ -15,8 +16,7 @@ def response(status: bool, message: str, status_code: int, data=None, headers=No
     """
     if headers is None:
         headers = {}
-    return Response({
-        "status": "success" if status else "error",
-        "message": message,
-        "data": data if status else None
-    }, status=status_code, headers=headers)
+
+    message = message if type(message) in [ReturnDict, list] else {message}
+
+    return Response(data if data else message, status=status_code, headers=headers)

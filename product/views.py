@@ -33,6 +33,9 @@ class ProductCreateView(generics.CreateAPIView):
             if Product.objects.filter(sku=request.data.get("sku")).exists():
                 return response(False, "Product with this SKU already exist", status.HTTP_400_BAD_REQUEST)
 
+            if type(request.data.get("quantity")) is str:
+                return response(False, "quantity field cannot be of type string", status.HTTP_400_BAD_REQUEST)
+
             # Add owner_user to request data
             request.data.update({"owner_user": request.user.id})
 
@@ -112,6 +115,9 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
                 return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+
+            if request.data.get("quantity", None) and type(request.data.get("quantity")) is str:
+                return response(False, "quantity field cannot be of type string", status.HTTP_400_BAD_REQUEST)
 
             # Retrieve the Product object from the database
             product = Product.objects.get(id=kwargs['id'])
