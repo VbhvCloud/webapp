@@ -142,16 +142,16 @@ class GetUpdateUserAPITestCase(TestCase):
 
     def test_get_user(self):
         response = self.client.get(
-            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
+            reverse('users:details', kwargs={'userId': self.owner.json()["id"]}),
             **self.valid_headers,
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content.decode())["data"]["username"], 'testuser@example.com')
+        self.assertEqual(json.loads(response.content.decode())["username"], 'testuser@example.com')
 
     def test_get_invalid_user(self):
         response = self.client.get(
-            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
+            reverse('users:details', kwargs={'userId': self.owner.json()["id"]}),
             **self.invalid_header,
             content_type='application/json'
         )
@@ -159,7 +159,7 @@ class GetUpdateUserAPITestCase(TestCase):
 
     def test_update_user(self):
         response = self.client.put(
-            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
+            reverse('users:details', kwargs={'userId': self.owner.json()["id"]}),
             data=self.valid_data,
             **self.valid_headers,
             content_type='application/json'
@@ -168,7 +168,7 @@ class GetUpdateUserAPITestCase(TestCase):
 
     def test_invalid_update_user(self):
         response = self.client.put(
-            reverse('users:details', kwargs={'userId': self.owner.json()["data"]["id"]}),
+            reverse('users:details', kwargs={'userId': self.owner.json()["id"]}),
             data=self.invalid_data,
             **self.valid_headers,
             content_type='application/json'
