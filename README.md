@@ -48,7 +48,7 @@ The API has the following endpoints:
 3. User details: /v1/user/<user_id> (GET, PUT)
 4. Health Check: /healthz (GET)
 5. Product add: /v1/product/ (POST)
-6. Product details: /v1/product/<product_id> (GET, PATCH, DELETE)
+6. Product details: /v1/product/<product_id> (GET, PATCH, DELETE, PUT)
 
 You can test the API using any REST client such as Postman.
 
