@@ -17,6 +17,6 @@ def response(status: bool, message: str, status_code: int, data=None, headers=No
     if headers is None:
         headers = {}
 
-    message = message if type(message) in [ReturnDict, list] else {message}
+    message = message if type(message) in [ReturnDict, list] else {"message": message}
 
     return Response(data if data else message, status=status_code, headers=headers)
