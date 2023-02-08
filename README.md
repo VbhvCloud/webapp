@@ -43,9 +43,12 @@ export DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_
 ### Usage
 The API has the following endpoints:
 
-1. Register user: /register/ (POST)
-2. Login: /login/ (POST)
-3. User details: /users/ (GET, PUT)
+1. Register user: /v1/user/ (POST)
+2. Login: /v1/user/login/ (POST)
+3. User details: /v1/user/<user_id> (GET, PUT)
+4. Health Check: /healthz (GET)
+5. Product add: /v1/product/ (POST)
+6. Product details: /v1/product/<product_id> (GET, PATCH, DELETE)
 
 You can test the API using any REST client such as Postman.
 
