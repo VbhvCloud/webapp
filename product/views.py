@@ -128,7 +128,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
 
             # Check if the request data is empty
             if not request.data:
-                return response(False, "No data to update", status.HTTP_204_NO_CONTENT)
+                return response(False, "No data to update", status.HTTP_400_BAD_REQUEST)
 
             # Check if the SKU of the Product exists in the request data and it is different from the current SKU
             # and a Product with the new SKU already exists in the database
@@ -147,7 +147,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                     serializer.save()
                 # Retrieve the updated product from the database
                 product = Product.objects.filter(sku=serializer.data.get('sku')).values().first()
-                return response(True, "Product data updated successfully", status.HTTP_200_OK, data=product)
+                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT)
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -181,7 +181,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
 
             # Check if the request data is empty
             if not request.data:
-                return response(False, "No data to update", status.HTTP_204_NO_CONTENT)
+                return response(False, "No data to update", status.HTTP_400_BAD_REQUEST)
 
             # Check if the SKU of the Product exists in the request data and it is different from the current SKU
             # and a Product with the new SKU already exists in the database
@@ -200,7 +200,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                     serializer.save()
                 # Retrieve the updated product from the database
                 product = Product.objects.filter(sku=serializer.data.get('sku')).values().first()
-                return response(True, "Product data updated successfully", status.HTTP_200_OK, data=product)
+                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT)
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
