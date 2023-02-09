@@ -164,7 +164,7 @@ class GetUpdateUserAPITestCase(TestCase):
             **self.valid_headers,
             content_type='application/json'
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
 
     def test_invalid_update_user(self):
         response = self.client.put(
