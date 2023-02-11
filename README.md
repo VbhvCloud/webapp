@@ -7,6 +7,7 @@ This is a Django based RESTful API for managing user data. It includes APIs for 
 - Python 3.x
 - Django 3.x
 - Django REST framework
+- 
 
 ### Installation
 1. Clone the repository to your local machine and cd into webapp.
