@@ -68,6 +68,7 @@ jobs:
         fi
     - name: Check Packer file valid
       run: |
+        packer init packer
         if ! packer validate packer; then
           echo "Packer files are not valid."
           exit 1
