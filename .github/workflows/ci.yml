@@ -63,7 +63,6 @@ jobs:
     - name: Check Packer file format
       run: |
         packer fmt -check packer
-        if [ $? -ne 0 ]; then
-          echo "Packer template format is incorrect"
-          exit 1
-        fi
+    - name: Fail if Packer file is not formatted correctly
+      if: ${{ steps.check_format.outcome != 'success' }}
+      run: exit 1
