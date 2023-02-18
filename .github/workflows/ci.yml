@@ -61,7 +61,9 @@ jobs:
     - name: Install Packer
       run: sudo apt-get update && sudo apt-get install -y packer
     - name: Check Packer file format
-      run: packer validate packer
+      run: |
+        packer init packer
+        packer validate packer
     - name: Check Packer file format
       run: |
         packer fmt -check packer
