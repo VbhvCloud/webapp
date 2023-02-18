@@ -66,3 +66,9 @@ jobs:
           echo "Packer format is not correct. Please run 'packer fmt' to fix the issue."
           exit 1
         fi
+    - name: Check Packer file valid
+      run: |
+        if ! packer validate packer; then
+          echo "Packer files are not valid."
+          exit 1
+        fi
