@@ -33,7 +33,7 @@ source "amazon-ebs" "webapp-ami" {
   vpc_id = "vpc-0a4dc05ee10ccc4d1"
 
   launch_block_device_mappings {
-    device_name           =  "/dev/xvda"
+    device_name           = "/dev/xvda"
     delete_on_termination = true
   }
 }
