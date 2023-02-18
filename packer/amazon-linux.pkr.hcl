@@ -34,7 +34,7 @@ source "amazon-ebs" "webapp-ami" {
 
   launch_block_device_mappings {
     device_name           = "/dev/xvda"
-    delete_on_termination = true
+    delete_on_termination = "${var.region}"
   }
 }
 
