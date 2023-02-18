@@ -61,6 +61,9 @@ jobs:
     - name: Install Packer
       run: sudo apt-get update && sudo apt-get install -y packer
     - name: Check Packer file format
-    - name: Check Packer file format
       run: |
         packer fmt -check packer
+        if [ $? -ne 0 ]; then
+          echo "Packer template format is incorrect"
+          exit 1
+        fi
