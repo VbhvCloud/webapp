@@ -62,7 +62,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y packer
     - name: Check Packer file format
       run: |
-        packer fmt -check packer
-    - name: Fail if Packer file is not formatted correctly
-      if: ${{ steps.check_format.outcome != 'success' }}
-      run: exit 1
+        if ! packer fmt -check packer; then
+          echo "Packer format is not correct. Please run 'packer fmt' to fix the issue."
+          exit 1
+        fi
