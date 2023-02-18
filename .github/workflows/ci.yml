@@ -63,8 +63,7 @@ jobs:
     - name: Check Packer file format
     - name: Check Packer file format
       run: |
-        packer fmt -check packer
-        if [ $? -ne 0 ]; then
-          echo "Packer template format is incorrect"
+        if ! packer fmt -check packer; then
+          echo "Packer format is not correct. Please run 'packer fmt' to fix the issue."
           exit 1
         fi
