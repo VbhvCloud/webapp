@@ -61,12 +61,10 @@ jobs:
     - name: Install Packer
       run: sudo apt-get update && sudo apt-get install -y packer
     - name: Check Packer file format
-      run: |
-        packer init packer
-        packer validate packer
     - name: Check Packer file format
       run: |
         packer fmt -check packer
-    - name: Fail if Packer file is not formatted correctly
-      if: ${{ steps.check_format.outcome != 'success' }}
-      run: exit 1
+        if [ $? -ne 0 ]; then
+          echo "Packer template format is incorrect"
+          exit 1
+        fi
