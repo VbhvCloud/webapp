@@ -1,4 +1,4 @@
-SHELL := /bin/zsh
+SHELL := /bin/bash
 VENV_NAME=venv
 
 #
@@ -14,13 +14,25 @@ DATABASE_URL?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST)
 # =============================================================================
 
 makemigrations:
-	python manage.py makemigrations
+	python3 manage.py makemigrations
 
 migrate: makemigrations
-	python manage.py migrate
+	python3 manage.py migrate
 
 runserver: makemigrations migrate
-	python manage.py runserver
+	python3 manage.py runserver 8001
 
 test:
-	python manage.py test
+	python3 manage.py test
+
+init:
+	packer init packer
+
+fmt:
+	packer fmt packer
+	
+validate: fmt
+	packer validate packer
+
+build: validate
+	packer build packer/amazon-linux.pkr.hcl
