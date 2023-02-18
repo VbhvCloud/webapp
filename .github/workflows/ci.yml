@@ -63,7 +63,4 @@ jobs:
     - name: Check Packer file format
     - name: Check Packer file format
       run: |
-        if ! packer fmt -check packer; then
-          echo "Packer format is not correct. Please run 'packer fmt' to fix the issue."
-          exit 1
-        fi
+        packer fmt -check packer
