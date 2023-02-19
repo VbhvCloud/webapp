@@ -47,6 +47,7 @@ jobs:
   packer-build:
     name: Packer Build
     runs-on: ubuntu-latest
+    secrets: inherit
     if: github.event.pull_request.merged == true
     steps:
 
