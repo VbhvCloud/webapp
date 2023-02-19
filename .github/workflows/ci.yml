@@ -55,9 +55,15 @@ jobs:
   
   check_format:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.AWS_ACCESS_KEY_ID }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: env
+      run: |
+        echo "hello"
+        echo $DATABASE_URL
     - name: Install Packer
       run: sudo apt-get update && sudo apt-get install -y packer
     - name: Check Packer file format
