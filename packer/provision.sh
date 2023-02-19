@@ -46,8 +46,8 @@ cd /home/ec2-user/webapp
 pip3 install --upgrade pip
 pip3 install -r requirements/local.txt
 
+# webapp system service
 sudo cp packer/webapp.service /etc/systemd/system/
-
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
 sudo systemctl start webapp.service
