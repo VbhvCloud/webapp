@@ -17,15 +17,20 @@ EOF
 sudo yum makecache
 sudo yum install postgresql14 postgresql14-server -y
 
-
+# export variables
+export POSTGRES_USER=${POSTGRES_USER}
+export POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+export POSTGRES_DB=${POSTGRES_DB}
+export POSTGRES_PORT=${POSTGRES_PORT}
+export POSTGRES_HOST=${POSTGRES_HOST}
 
 # Create postgres user
 sudo postgresql-14-setup initdb
 sudo systemctl enable --now postgresql-14
 sudo su - postgres <<EOF
-psql -c "CREATE database webapp"
-psql -c "CREATE USER webapp WITH PASSWORD 'webapp';"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE webapp TO webapp;"
+psql -c "CREATE database ${POSTGRES_DB}"
+psql -c "CREATE USER ${POSTGRES_USER} WITH PASSWORD '${POSTGRES_PASSWORD}';"
+psql -c "GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DB} TO ${POSTGRES_USER};"
 psql -c "\du"
 EOF
 sudo sed -i 's/\(scram-sha-256\|ident\|peer\)/md5/g' /var/lib/pgsql/14/data/pg_hba.conf
