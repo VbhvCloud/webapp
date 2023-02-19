@@ -9,7 +9,7 @@ packer {
 
 variable "ami_users" {
   type    = list(string)
-  default = ["708350626625", "968826851366", "397760876919"]
+  default = ["708350626625", "397760876919"]
 }
 
 variable "region" {
@@ -17,20 +17,53 @@ variable "region" {
   default = "us-east-1"
 }
 
+variable "source_ami" {
+  type    = string
+  default = "ami-0dfcb1ef8550277af"
+}
+
+variable "instance_type" {
+  type    = string
+  default = "t2.micro"
+}
+
+variable "ssh_username" {
+  type    = string
+  default = "ec2-user"
+}
+
+variable "subnet_id" {
+  type    = string
+  default = "subnet-096d56e8c34dd55e7"
+}
+
+variable "vpc_id" {
+  type    = string
+  default = "vpc-0a4dc05ee10ccc4d1"
+}
+
+variable "ami_name" {
+  type    = string
+  default = "webapp-ami"
+}
+variable "environment" {
+  type    = string
+  default = "dev"
+}
+
 source "amazon-ebs" "webapp-ami" {
-  profile       = "dev"
-  ami_name      = "webapp-ami"
+  ami_name      = "${var.ami_name}"
   ami_users     = "${var.ami_users}"
-  instance_type = "t2.micro"
+  instance_type = "${var.instance_type}"
   region        = "${var.region}"
-  source_ami    = "ami-0dfcb1ef8550277af"
-  ssh_username  = "ec2-user"
-  subnet_id     = "subnet-096d56e8c34dd55e7"
+  source_ami    = "${var.source_ami}"
+  ssh_username  = "${var.ssh_username}"
+  subnet_id     = "${var.subnet_id}"
   tags = {
-    Name        = "webapp-ami"
-    Environment = "dev"
+    Name        = "${var.ami_name}"
+    Environment = "${var.environment}"
   }
-  vpc_id = "vpc-0a4dc05ee10ccc4d1"
+  vpc_id = "${var.vpc_id}"
 
   launch_block_device_mappings {
     device_name           = "/dev/xvda"
