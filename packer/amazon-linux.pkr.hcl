@@ -8,24 +8,24 @@ packer {
 }
 
 variable "POSTGRES_USER" {
-  type    = string
+  type = string
 }
 
 variable "POSTGRES_PASSWORD" {
-  type    = string
+  type = string
 }
 
 
 variable "POSTGRES_HOST" {
-  type    = string
+  type = string
 }
 
 variable "POSTGRES_PORT" {
-  type    = string
+  type = string
 }
 
 variable "POSTGRES_DB" {
-  type    = string
+  type = string
 }
 
 variable "ami_users" {
@@ -103,7 +103,7 @@ build {
   }
 
   provisioner "shell" {
-    script = "packer/provision.sh"
+    script           = "packer/provision.sh"
     environment_vars = ["POSTGRES_USER=${var.POSTGRES_USER}", "POSTGRES_PASSWORD=${var.POSTGRES_PASSWORD}", "POSTGRES_HOST=${var.POSTGRES_HOST}", "POSTGRES_PORT=${var.POSTGRES_PORT}", "POSTGRES_DB=${var.POSTGRES_DB}"]
   }
 }
