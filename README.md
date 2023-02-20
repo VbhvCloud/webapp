@@ -40,6 +40,10 @@ export DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_
 
     $ python manage.py test
 
+### Build aws ami with packer
+
+    $ make build
+
 ### Usage
 The API has the following endpoints:
 
