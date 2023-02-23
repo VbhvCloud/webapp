@@ -18,11 +18,11 @@ sudo yum makecache
 sudo yum install postgresql14 postgresql14-server -y
 
 # export variables
-export POSTGRES_USER=${POSTGRES_USER}
-export POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-export POSTGRES_DB=${POSTGRES_DB}
-export POSTGRES_PORT=${POSTGRES_PORT}
-export POSTGRES_HOST=${POSTGRES_HOST}
+sudo sh -c 'echo "export POSTGRES_USER='${POSTGRES_USER}'" >> /etc/profile'
+sudo sh -c 'echo "export POSTGRES_PASSWORD='${POSTGRES_PASSWORD}'" >> /etc/profile'
+sudo sh -c 'echo "export POSTGRES_DB='${POSTGRES_DB}'" >> /etc/profile'
+sudo sh -c 'echo "export POSTGRES_PORT='${POSTGRES_PORT}'" >> /etc/profile'
+sudo sh -c 'echo "export POSTGRES_HOST='${POSTGRES_HOST}'" >> /etc/profile'
 
 # Create postgres user
 sudo postgresql-14-setup initdb
