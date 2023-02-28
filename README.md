@@ -1,4 +1,4 @@
-# Webapp
+# Webapp Application
 
 This is a Django based RESTful API for managing user data. It includes APIs for registration, login, and user details retrieval and update.
 
