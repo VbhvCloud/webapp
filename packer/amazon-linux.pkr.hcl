@@ -73,7 +73,7 @@ variable "environment" {
 }
 
 source "amazon-ebs" "webapp-ami" {
-  ami_name      = "${var.ami_name}"
+  ami_name      =     "${var.ami_name}"
   ami_users     = "${var.ami_users}"
   instance_type = "${var.instance_type}"
   region        = "${var.region}"
