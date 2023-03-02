@@ -149,7 +149,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                 # Save the changes in the database using transaction
                 with transaction.atomic():
                     serializer.save()
-                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT)
+                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT, show_data=True)
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -199,7 +199,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                 # Save the changes in the database using transaction
                 with transaction.atomic():
                     serializer.save()
-                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT)
+                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT, show_data=True)
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -232,7 +232,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             product.delete()
 
             # Return success message and relevant HTTP status code
-            return response(True, "Product deleted successfully", status.HTTP_204_NO_CONTENT)
+            return response(True, "Product deleted successfully", status.HTTP_204_NO_CONTENT, show_data=True)
         except Exception as e:
             # Return failure message and relevant HTTP status code in case of an error
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
@@ -326,7 +326,7 @@ class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
             image.delete()
 
             # Return success message and relevant HTTP status code
-            return response(True, "Image deleted successfully", status.HTTP_204_NO_CONTENT)
+            return response(True, "Image deleted successfully", status.HTTP_204_NO_CONTENT, show_data=True)
         except Exception as e:
             # Return failure message and relevant HTTP status code in case of an error
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)

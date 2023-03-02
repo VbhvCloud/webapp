@@ -183,7 +183,7 @@ class Users(generics.GenericAPIView):
                     user.save()
                 return_data = User.objects.filter(username=request.user.get_username()). \
                     values("id", "first_name", "last_name", "username", "account_created", "account_updated").first()
-                return response(True, "User Updated Successfully", status.HTTP_204_NO_CONTENT)
+                return response(True, "User Updated Successfully", status.HTTP_204_NO_CONTENT, show_data=True)
         except Exception as e:
             return response(False, str(e), status.HTTP_400_BAD_REQUEST)
 
