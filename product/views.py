@@ -1,3 +1,8 @@
+# Python imports
+from PIL import Image
+import boto3
+import environ
+
 # Django imports
 from django.db import transaction
 
@@ -7,8 +12,8 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 # Project imports
-from .models import Product
-from .serializers import ProductSerializer, ProductUpdateSerializer
+from .models import Product, ProductImage
+from .serializers import ProductSerializer, ProductUpdateSerializer, ProductImageSerializer
 from webapp.users.utils import response
 
 
@@ -130,11 +135,10 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             if not request.data:
                 return response(False, "No data to update", status.HTTP_400_BAD_REQUEST)
 
-            # Check if the SKU of the Product exists in the request data and it is different from the current SKU
+            # Check if the SKU of the Product exists in the request data, and it is different from the current SKU
             # and a Product with the new SKU already exists in the database
             if request.data.get("sku", False) and \
-                request.data['sku'] != product.sku and \
-                Product.objects.filter(sku=request.data['sku']).exists():
+                    request.data['sku'] != product.sku and Product.objects.filter(sku=request.data['sku']).exists():
                 return response(False, "Product with this SKU already exists", status.HTTP_400_BAD_REQUEST)
 
             # Get the serializer with the current product instance and request data
@@ -145,8 +149,6 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                 # Save the changes in the database using transaction
                 with transaction.atomic():
                     serializer.save()
-                # Retrieve the updated product from the database
-                product = Product.objects.filter(sku=serializer.data.get('sku')).values().first()
                 return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT)
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
@@ -186,8 +188,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             # Check if the SKU of the Product exists in the request data and it is different from the current SKU
             # and a Product with the new SKU already exists in the database
             if request.data.get("sku", False) and \
-                request.data['sku'] != product.sku and \
-                Product.objects.filter(sku=request.data['sku']).exists():
+                    request.data['sku'] != product.sku and Product.objects.filter(sku=request.data['sku']).exists():
                 return response(False, "Product with this SKU already exists", status.HTTP_400_BAD_REQUEST)
 
             # Get the serializer with the current product instance and request data
@@ -198,8 +199,6 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                 # Save the changes in the database using transaction
                 with transaction.atomic():
                     serializer.save()
-                # Retrieve the updated product from the database
-                product = Product.objects.filter(sku=serializer.data.get('sku')).values().first()
                 return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT)
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
@@ -234,6 +233,195 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
 
             # Return success message and relevant HTTP status code
             return response(True, "Product deleted successfully", status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            # Return failure message and relevant HTTP status code in case of an error
+            return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
+
+
+class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
+    """
+    View for retrieving and deleting a Product's Image.
+    Uses BasicAuthentication for authentication and
+    requires the user to be authenticated.
+    Uses ProductUpdateSerializer for updating a Product.
+    """
+    http_method_names = ['get', 'delete']
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductImageSerializer
+
+    def get(self, request, *args, **kwargs):
+        """
+        Handle GET request to retrieve a Product.
+        Returns a response with success or failure message and relevant HTTP status code.
+
+        :param request: The incoming request
+        :param args: Additional positional arguments
+        :param kwargs: Additional keyword arguments, including the `id` of the Product to retrieve
+        :return: A response object with success or failure message and relevant HTTP status code
+        """
+        try:
+            # Check if the requested Product exists in the database
+            if not Product.objects.filter(id=kwargs['id']).exists():
+                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+
+            # Retrieve the Product data from the database
+            product = Product.objects.get(id=kwargs['id'])
+
+            if not ProductImage.objects.filter(image_id=kwargs['image_id'], product=product).exists():
+                return response(False, "Image id associated with this product does not exist",
+                                status.HTTP_404_NOT_FOUND)
+
+            # Check if the requesting user is the owner of the Product
+            if not product.owner_user == request.user:
+                return response(False, "You are not allowed to get this product's data", status.HTTP_403_FORBIDDEN)
+
+            image_data = ProductImage.objects.filter(image_id=kwargs['image_id']).values().first()
+
+            # Return a success response with the Image data
+            return response(True, "Image data fetched successfully", status.HTTP_200_OK, data=image_data)
+        except Exception as e:
+            # Return a failure response with the error message in case of an exception
+            return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Handle DELETE request to delete a specific Product's Image.
+        Returns a response with success or failure message and relevant HTTP status code.
+
+        :param request: The incoming request
+        :param args: Additional positional arguments
+        :param kwargs: Additional keyword arguments, including the `id` of the Product and Image to delete
+        :return: A response object with success or failure message and relevant HTTP status code
+        """
+        try:
+            # Check if the requested Product exists in the database
+            if not Product.objects.filter(id=kwargs['id']).exists():
+                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+
+            # Retrieve the Product object from the database
+            product = Product.objects.get(id=kwargs['id'])
+
+            if not ProductImage.objects.filter(image_id=kwargs['image_id'], product=product).exists():
+                return response(False, "Image id associated with this product does not exist",
+                                status.HTTP_404_NOT_FOUND)
+
+            # Check if the requesting user is the owner of the Product
+            if not product.owner_user == request.user:
+                return response(False, "You are not allowed to delete this product's data", status.HTTP_403_FORBIDDEN)
+
+            # Retrieve the Image object from the database
+            image = ProductImage.objects.get(image_id=kwargs['image_id'])
+            use_profile = environ.Env().bool("USE_PROFILE", default=False)
+
+            # Delete the image from s3
+            try:
+                s3 = boto3.Session(profile_name='dev').client('s3') if use_profile else boto3.client("s3")
+                s3.delete_object(Bucket=environ.Env().str("S3_BUCKET"), Key=image.s3_bucket_path)
+
+            except Exception as e:
+                return response(False, str(e), status.HTTP_400_BAD_REQUEST)
+
+            # Delete the Image from the database
+            image.delete()
+
+            # Return success message and relevant HTTP status code
+            return response(True, "Image deleted successfully", status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            # Return failure message and relevant HTTP status code in case of an error
+            return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
+
+
+class ProductImageGetPostView(generics.ListCreateAPIView):
+    """
+    View for retrieving and deleting a Product's Image.
+    Uses BasicAuthentication for authentication and
+    requires the user to be authenticated.
+    Uses ProductImageSerializer for updating a Product's Image.
+    """
+    http_method_names = ['get', 'post']
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductImageSerializer
+
+    def list(self, request, *args, **kwargs):
+        """
+        Handle GET request to retrieve a Product's Image list.
+        Returns a response with success or failure message and relevant HTTP status code.
+
+        :param request: The incoming request
+        :param args: Additional positional arguments
+        :param kwargs: Additional keyword arguments, including the `id` of the Product to retrieve
+        :return: A response object with success or failure message and relevant HTTP status code
+        """
+        try:
+            # Check if the requested Product exists in the database
+            if not Product.objects.filter(id=kwargs['id']).exists():
+                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+
+            # Retrieve the Product object from the database
+            product = Product.objects.get(id=kwargs['id'])
+
+            # Check if the requesting user is the owner of the Product
+            if not product.owner_user == request.user:
+                return response(False, "You are not allowed to get this product's data", status.HTTP_403_FORBIDDEN)
+
+            image_data = ProductImage.objects.filter(product=product).values()
+
+            # Return a success response with the Product data
+            return response(True, "Product data fetched successfully", status.HTTP_200_OK, data=image_data,
+                            show_data=True)
+        except Exception as e:
+            # Return a failure response with the error message in case of an exception
+            return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Handle POST request to add a specific Product's Image.
+        Returns a response with success or failure message and relevant HTTP status code.
+
+        :param request: The incoming request
+        :param args: Additional positional arguments
+        :param kwargs: Additional keyword arguments, including the `id` of the Product.
+        :return: A response object with success or failure message and relevant HTTP status code
+        """
+        try:
+            # Check if the requested Product exists in the database
+            if not Product.objects.filter(id=kwargs['id']).exists():
+                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+
+            # Retrieve the Product object from the database
+            product = Product.objects.get(id=kwargs['id'])
+
+            # Check if the requesting user is the owner of the Product
+            if not product.owner_user == request.user:
+                return response(False, "You are not allowed to Update this product's data", status.HTTP_403_FORBIDDEN)
+
+            if not request.FILES.get("image", False):
+                return response(False, "Please select image as form-data", status.HTTP_400_BAD_REQUEST)
+
+            try:
+                file_stream = request.FILES["image"].read()
+                Image.open(request.FILES["image"])
+            except Exception as e:
+                return response(False, "Invalid image : {}".format(str(e)), status.HTTP_400_BAD_REQUEST)
+
+            use_profile = environ.Env().bool("USE_PROFILE", default=False)
+            serializer = ProductImage(product=product, file_name=request.FILES["image"].name)
+            serializer.save()
+            serializer.s3_bucket_path = "{}/{}/{}".format(product.id, serializer.image_id, serializer.file_name)
+            serializer.save()
+            data = ProductImage.objects.filter(image_id=serializer.image_id).values().first()
+
+            try:
+                s3 = boto3.Session(profile_name='dev').client('s3') if use_profile else boto3.client("s3")
+                s3.put_object(Body=file_stream, Bucket=environ.Env().str("S3_BUCKET"), Key=serializer.s3_bucket_path)
+
+            except Exception as e:
+                return response(False, str(e), status.HTTP_400_BAD_REQUEST)
+
+            # Return success message and relevant HTTP status code
+            return response(True, "Image Uploaded successfully", status.HTTP_201_CREATED, data)
         except Exception as e:
             # Return failure message and relevant HTTP status code in case of an error
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)

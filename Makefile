@@ -9,6 +9,7 @@ POSTGRES_PASSWORD ?= webapp
 POSTGRES_HOST ?= 127.0.0.1
 POSTGRES_PORT ?= 5432
 POSTGRES_DB ?= webapp
+S3_BUCKET ?= test
 DATABASE_URL?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)
 
 # =============================================================================
@@ -30,7 +31,7 @@ init:
 
 fmt:
 	packer fmt packer
-	
+
 validate: fmt
 	packer validate packer
 

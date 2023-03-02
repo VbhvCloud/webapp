@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 
 
-def response(status: bool, message: str, status_code: int, data=None, headers=None):
+def response(status: bool, message: str, status_code: int, data=None, headers=None, show_data=False):
     """
     Customize the response for better information delivery.
 
@@ -19,4 +19,4 @@ def response(status: bool, message: str, status_code: int, data=None, headers=No
 
     message = message if type(message) in [ReturnDict, list] else {"message": message}
 
-    return Response(data if data else message, status=status_code, headers=headers)
+    return Response(data if data or show_data else message, status=status_code, headers=headers)

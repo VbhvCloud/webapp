@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -38,3 +39,11 @@ class Product(BaseModel):
 
     class Meta:
         db_table = 'product'
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image_id = models.AutoField(primary_key=True, editable=False)
+    file_name = models.CharField(max_length=200, editable=False)
+    date_created = models.DateTimeField(auto_now_add=True, editable=False)
+    s3_bucket_path = models.CharField(max_length=200, null=True, editable=False)

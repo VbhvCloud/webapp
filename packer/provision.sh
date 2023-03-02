@@ -15,26 +15,7 @@ enabled=1
 gpgcheck=0
 EOF
 sudo yum makecache
-sudo yum install postgresql14 postgresql14-server -y
-
-# export variables
-sudo sh -c 'echo "export POSTGRES_USER='${POSTGRES_USER}'" >> /etc/profile'
-sudo sh -c 'echo "export POSTGRES_PASSWORD='${POSTGRES_PASSWORD}'" >> /etc/profile'
-sudo sh -c 'echo "export POSTGRES_DB='${POSTGRES_DB}'" >> /etc/profile'
-sudo sh -c 'echo "export POSTGRES_PORT='${POSTGRES_PORT}'" >> /etc/profile'
-sudo sh -c 'echo "export POSTGRES_HOST='${POSTGRES_HOST}'" >> /etc/profile'
-
-# Create postgres user
-sudo postgresql-14-setup initdb
-sudo systemctl enable --now postgresql-14
-sudo su - postgres <<EOF
-psql -c "CREATE database ${POSTGRES_DB}"
-psql -c "CREATE USER ${POSTGRES_USER} WITH PASSWORD '${POSTGRES_PASSWORD}';"
-psql -c "GRANT ALL PRIVILEGES ON DATABASE ${POSTGRES_DB} TO ${POSTGRES_USER};"
-psql -c "\du"
-EOF
-sudo sed -i 's/\(scram-sha-256\|ident\|peer\)/md5/g' /var/lib/pgsql/14/data/pg_hba.conf
-sudo systemctl restart postgresql-14
+sudo yum install postgresql14 -y
 
 
 # Install Python 3.9
