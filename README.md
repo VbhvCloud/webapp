@@ -20,6 +20,11 @@ pip install -r requirements/local.txt
 ```bash
 export DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
 ```
+6. Export the S3 Bucket to the environment.
+```bash
+export USE_PROFILE=<bool>
+export S3_BUCKET=<bucket_name>
+```
 > **_NOTE:_**  replace the POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB with your database configurations.
 
 ### Setting Up Your Users
@@ -53,6 +58,8 @@ The API has the following endpoints:
 4. Health Check: /healthz (GET)
 5. Product add: /v1/product/ (POST)
 6. Product details: /v1/product/<product_id> (GET, PATCH, DELETE, PUT)
+7. Product Image: /v1/product/<product_id>/image (GET, POST)
+8. Product Image: /v1/product/<product_id>/image/<image_id> (GET, DELETE)
 
 You can test the API using any REST client such as Postman.
 
