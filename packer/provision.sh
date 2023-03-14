@@ -37,14 +37,3 @@ sudo cp packer/webapp.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
 sudo systemctl start webapp.service
-
-# Install nginx
-sudo amazon-linux-extras list | grep nginx
-sudo amazon-linux-extras enable nginx1
-sudo yum clean metadata
-sudo yum -y install nginx
-sudo systemctl enable nginx
-sudo cp packer/nginx.conf /etc/nginx/
-sudo systemctl restart nginx
-sudo systemctl reload nginx
-

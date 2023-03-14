@@ -21,7 +21,7 @@ migrate: makemigrations
 	python3 manage.py migrate
 
 runserver: makemigrations migrate
-	python3 manage.py runserver 8001
+	python3 manage.py runserver 0.0.0.0:8000
 
 test:
 	python3 manage.py test
