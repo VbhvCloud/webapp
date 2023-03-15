@@ -61,5 +61,5 @@ jobs:
     - name: Initialize packer
       run: packer init packer
     - name: Build Packer image
-      run: packer build packer/amazon-linux.pkr.hcl
+      run: packer build packer
       
