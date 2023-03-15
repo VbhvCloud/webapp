@@ -36,4 +36,4 @@ validate: fmt
 	packer validate packer
 
 build: init validate
-	packer build packer/amazon-linux.pkr.hcl
+	packer build packer

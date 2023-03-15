@@ -8,8 +8,7 @@ packer {
 }
 
 variable "ami_users" {
-  type    = list(string)
-  default = ["708350626625", "397760876919"]
+  type = list(string)
 }
 
 variable "region" {
@@ -52,6 +51,7 @@ variable "environment" {
 }
 
 source "amazon-ebs" "webapp-ami" {
+  profile       = "dev"
   ami_name      = "${var.ami_name}"
   ami_users     = "${var.ami_users}"
   instance_type = "${var.instance_type}"
