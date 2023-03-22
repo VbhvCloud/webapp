@@ -2,9 +2,11 @@
 from PIL import Image
 import boto3
 import environ
+import logging
 
 # Django imports
 from django.db import transaction
+from statsd.defaults.django import statsd
 
 # Rest framework imports
 from rest_framework import generics, status
@@ -16,6 +18,7 @@ from .models import Product, ProductImage
 from .serializers import ProductSerializer, ProductUpdateSerializer, ProductImageSerializer
 from webapp.users.utils import response
 
+logger = logging.getLogger(__name__)
 
 class ProductCreateView(generics.CreateAPIView):
     """
@@ -34,9 +37,10 @@ class ProductCreateView(generics.CreateAPIView):
         Returns a response with success or failure message and relevant status code.
         """
         try:
+            statsd.incr("product_create")
             # Check if product with the same SKU already exists
             if Product.objects.filter(sku=request.data.get("sku")).exists():
-                return response(False, "Product with this SKU already exist", status.HTTP_400_BAD_REQUEST)
+                return response(False, "Product with this SKU {} already exist".format(request.data.get("sku")), status.HTTP_400_BAD_REQUEST)
 
             if type(request.data.get("quantity")) is str:
                 return response(False, "quantity field cannot be of type string", status.HTTP_400_BAD_REQUEST)
@@ -52,7 +56,7 @@ class ProductCreateView(generics.CreateAPIView):
                 with transaction.atomic():
                     product.save()
                 # Return success response with product data
-                return response(True, "Product Created Successfully", status.HTTP_201_CREATED, product.data)
+                return response(True, "Product Created Successfully", status.HTTP_201_CREATED, product.data, log_level="info")
             else:
                 # Return error response with serializer errors
                 return response(False, product.errors, status.HTTP_400_BAD_REQUEST)
@@ -93,15 +97,16 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("product_get")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             # Retrieve the Product data from the database
             product_data = Product.objects.filter(id=kwargs['id']).values().first()
 
             # Return a success response with the Product data
-            return response(True, "Product data fetched successfully", status.HTTP_200_OK, data=product_data)
+            return response(True, "Product data fetched successfully", status.HTTP_200_OK, data=product_data, log_level="info")
         except Exception as e:
             # Return a failure response with the error message in case of an exception
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
@@ -117,9 +122,10 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("product_patch")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             if request.data.get("quantity", None) and type(request.data.get("quantity")) is str:
                 return response(False, "quantity field cannot be of type string", status.HTTP_400_BAD_REQUEST)
@@ -139,7 +145,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             # and a Product with the new SKU already exists in the database
             if request.data.get("sku", False) and \
                     request.data['sku'] != product.sku and Product.objects.filter(sku=request.data['sku']).exists():
-                return response(False, "Product with this SKU already exists", status.HTTP_400_BAD_REQUEST)
+                return response(False, "Product with this SKU {} already exists".format(request.data['sku']), status.HTTP_400_BAD_REQUEST)
 
             # Get the serializer with the current product instance and request data
             serializer = self.get_serializer(instance=product, data=request.data, partial=True)
@@ -149,7 +155,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                 # Save the changes in the database using transaction
                 with transaction.atomic():
                     serializer.save()
-                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT, show_data=True)
+                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT, show_data=True, log_level="info")
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -167,9 +173,10 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("product_update")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             if request.data.get("quantity", None) and type(request.data.get("quantity")) is str:
                 return response(False, "quantity field cannot be of type string", status.HTTP_400_BAD_REQUEST)
@@ -189,7 +196,7 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             # and a Product with the new SKU already exists in the database
             if request.data.get("sku", False) and \
                     request.data['sku'] != product.sku and Product.objects.filter(sku=request.data['sku']).exists():
-                return response(False, "Product with this SKU already exists", status.HTTP_400_BAD_REQUEST)
+                return response(False, "Product with this SKU {} already exists".format(request.data['sku']), status.HTTP_400_BAD_REQUEST)
 
             # Get the serializer with the current product instance and request data
             serializer = self.get_serializer(instance=product, data=request.data)
@@ -197,9 +204,10 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             # Validate the serializer data
             if serializer.is_valid():
                 # Save the changes in the database using transaction
+                logger.info("Updating Product Data")
                 with transaction.atomic():
                     serializer.save()
-                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT, show_data=True)
+                return response(True, "Product data updated successfully", status.HTTP_204_NO_CONTENT, show_data=True, log_level="info")
             else:
                 return response(False, serializer.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -217,9 +225,10 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("product_delete")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             # Retrieve the Product object from the database
             product = Product.objects.get(id=kwargs['id'])
@@ -229,10 +238,11 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
                 return response(False, "You are not allowed to delete this product's data", status.HTTP_403_FORBIDDEN)
 
             # Delete the Product from the database
+            logger.info("Deleting product")
             product.delete()
 
             # Return success message and relevant HTTP status code
-            return response(True, "Product deleted successfully", status.HTTP_204_NO_CONTENT, show_data=True)
+            return response(True, "Product deleted successfully", status.HTTP_204_NO_CONTENT, show_data=True, log_level="info")
         except Exception as e:
             # Return failure message and relevant HTTP status code in case of an error
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
@@ -261,9 +271,10 @@ class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("image_get")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             # Retrieve the Product data from the database
             product = Product.objects.get(id=kwargs['id'])
@@ -279,7 +290,7 @@ class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
             image_data = ProductImage.objects.filter(image_id=kwargs['image_id']).values().first()
 
             # Return a success response with the Image data
-            return response(True, "Image data fetched successfully", status.HTTP_200_OK, data=image_data)
+            return response(True, "Image data fetched successfully", status.HTTP_200_OK, data=image_data, log_level="info")
         except Exception as e:
             # Return a failure response with the error message in case of an exception
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
@@ -295,9 +306,10 @@ class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("image_delete")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             # Retrieve the Product object from the database
             product = Product.objects.get(id=kwargs['id'])
@@ -316,6 +328,7 @@ class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
 
             # Delete the image from s3
             try:
+                logger.info("Deleting object from S3")
                 s3 = boto3.Session(profile_name='dev').client('s3') if use_profile else boto3.client("s3")
                 s3.delete_object(Bucket=environ.Env().str("S3_BUCKET"), Key=image.s3_bucket_path)
 
@@ -326,7 +339,7 @@ class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
             image.delete()
 
             # Return success message and relevant HTTP status code
-            return response(True, "Image deleted successfully", status.HTTP_204_NO_CONTENT, show_data=True)
+            return response(True, "Image deleted successfully", status.HTTP_204_NO_CONTENT, show_data=True, log_level="info")
         except Exception as e:
             # Return failure message and relevant HTTP status code in case of an error
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
@@ -355,9 +368,10 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("image_list")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             # Retrieve the Product object from the database
             product = Product.objects.get(id=kwargs['id'])
@@ -370,7 +384,7 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
 
             # Return a success response with the Product data
             return response(True, "Product data fetched successfully", status.HTTP_200_OK, data=image_data,
-                            show_data=True)
+                            show_data=True, log_level="info")
         except Exception as e:
             # Return a failure response with the error message in case of an exception
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
@@ -386,9 +400,10 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
         :return: A response object with success or failure message and relevant HTTP status code
         """
         try:
+            statsd.incr("image_create")
             # Check if the requested Product exists in the database
             if not Product.objects.filter(id=kwargs['id']).exists():
-                return response(False, "Product does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "Product {} does not exist".format(kwargs['id']), status.HTTP_404_NOT_FOUND)
 
             # Retrieve the Product object from the database
             product = Product.objects.get(id=kwargs['id'])
@@ -407,6 +422,8 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
                 return response(False, "Invalid image : {}".format(str(e)), status.HTTP_400_BAD_REQUEST)
 
             use_profile = environ.Env().bool("USE_PROFILE", default=False)
+
+            logger.info("Create product and updating bucket path")
             serializer = ProductImage(product=product, file_name=request.FILES["image"].name)
             serializer.save()
             serializer.s3_bucket_path = "{}/{}/{}".format(product.id, serializer.image_id, serializer.file_name)
@@ -414,6 +431,7 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
             data = ProductImage.objects.filter(image_id=serializer.image_id).values().first()
 
             try:
+                logger.info("Connecting to S3 to upload file")
                 s3 = boto3.Session(profile_name='dev').client('s3') if use_profile else boto3.client("s3")
                 s3.put_object(Body=file_stream, Bucket=environ.Env().str("S3_BUCKET"), Key=serializer.s3_bucket_path)
 
@@ -421,7 +439,7 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
                 return response(False, str(e), status.HTTP_400_BAD_REQUEST)
 
             # Return success message and relevant HTTP status code
-            return response(True, "Image Uploaded successfully", status.HTTP_201_CREATED, data)
+            return response(True, "Image Uploaded successfully", status.HTTP_201_CREATED, data, log_level="info")
         except Exception as e:
             # Return failure message and relevant HTTP status code in case of an error
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)

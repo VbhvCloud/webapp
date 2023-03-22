@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate
 from django.db import transaction
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from statsd.defaults.django import statsd
 
 # Rest framework Imports
 from rest_framework import status, generics
@@ -22,7 +23,6 @@ from .utils import response
 
 # To log the messages
 logger = logging.getLogger(__name__)
-
 
 class RegisterUser(generics.CreateAPIView):
     """
@@ -44,15 +44,17 @@ class RegisterUser(generics.CreateAPIView):
                                     408: "If a timeout error occurs"})
     def post(self, request, *args, **kwargs):
         try:
+            statsd.incr("user_create")
             if User.objects.filter(username=request.data.get("username")).exists():
                 return response(False, "Username ID already Exists", status.HTTP_400_BAD_REQUEST)
             user = self.get_serializer(data=request.data)
             if user.is_valid():
+                logger.info("Saving user data")
                 with transaction.atomic():
                     user.save()
                 return_data = User.objects.filter(username=request.data.get("username")) \
                     .values("id", "first_name", "last_name", "username", "account_created", "account_updated").first()
-                return response(True, "User Created Successfully", status.HTTP_201_CREATED, return_data)
+                return response(True, "User Created Successfully", status.HTTP_201_CREATED, return_data, log_level="info")
             return response(False, user.errors, status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
@@ -81,6 +83,7 @@ class Login(generics.GenericAPIView):
                          )
     def post(request, *args, **kwargs):
         try:
+            statsd.incr("login")
             # check if the request contains necessary data
             if not request.data.get("username", None) or not request.data.get("password", None):
                 return response(False, "Please provide login credentials", status.HTTP_400_BAD_REQUEST)
@@ -104,7 +107,7 @@ class Login(generics.GenericAPIView):
                     "access-token": token
                 }, headers={
                     "access-token": token
-                })
+                }, log_level="info")
 
             # return error if authentication fails
             return response(False, "Invalid Credentials", status.HTTP_401_UNAUTHORIZED)
@@ -140,8 +143,9 @@ class Users(generics.GenericAPIView):
         """
 
         try:
+            statsd.incr("user_get")
             if not User.objects.filter(id=kwargs['userId']).exists():
-                return response(False, "User does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "User {} does not exist".format(kwargs['userId']), status.HTTP_404_NOT_FOUND)
 
             if not kwargs['userId'] == request.user.id:
                 return response(False, "You are not allowed to get this user", status.HTTP_403_FORBIDDEN)
@@ -149,7 +153,7 @@ class Users(generics.GenericAPIView):
             user_data = User.objects.filter(id=request.user.id).values("id", "first_name", "last_name", "username",
                                                                        "account_created", "account_updated")
 
-            return response(True, "User data fetched successfully", status.HTTP_200_OK, data=user_data.first())
+            return response(True, "User data fetched successfully", status.HTTP_200_OK, data=user_data.first(), log_level="info")
         except Exception as e:
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
 
@@ -168,8 +172,9 @@ class Users(generics.GenericAPIView):
         """
 
         try:
+            statsd.incr("user_update")
             if not User.objects.filter(id=kwargs['userId']).exists():
-                return response(False, "User does not exist", status.HTTP_404_NOT_FOUND)
+                return response(False, "User {} does not exist".format(kwargs['userId']), status.HTTP_404_NOT_FOUND)
 
             if not kwargs['userId'] == request.user.id:
                 return response(False, "You are not allowed to change this user's data", status.HTTP_403_FORBIDDEN)
@@ -181,9 +186,7 @@ class Users(generics.GenericAPIView):
             if user.is_valid(raise_exception=True):
                 with transaction.atomic():
                     user.save()
-                return_data = User.objects.filter(username=request.user.get_username()). \
-                    values("id", "first_name", "last_name", "username", "account_created", "account_updated").first()
-                return response(True, "User Updated Successfully", status.HTTP_204_NO_CONTENT, show_data=True)
+                return response(True, "User Updated Successfully", status.HTTP_204_NO_CONTENT, show_data=True, log_level="info")
         except Exception as e:
             return response(False, str(e), status.HTTP_400_BAD_REQUEST)
 
@@ -208,4 +211,5 @@ class Health(APIView):
     @swagger_auto_schema(tags=['Unauthenticated'], operation_summary="Health endpoint",
                          responses={200: 'server responds with 200 OK if it is healhty.'})
     def get(request, *args, **kwargs):
-        return response(True, "Health check successful", status.HTTP_200_OK)
+        statsd.incr("Healthz")
+        return response(True, "Health check successful", status.HTTP_200_OK, log_level="info")
