@@ -246,20 +246,45 @@ MANAGERS = ADMINS
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
     "formatters": {
         "verbose": {
             "format": "%(levelname)s %(asctime)s %(module)s "
                       "%(process)d %(thread)d %(message)s"
+        },
+        'standard': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%b/%d/%Y %H:%M:%S"
         }
     },
     "handlers": {
         "console": {
-            "level": "DEBUG",
+            "level": "INFO",
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": "standard",
+        },
+        "file": {
+            "level": 'INFO',
+            "class": 'logging.handlers.RotatingFileHandler',
+            "formatter": "standard",
+            "filename": 'service.log',
+            'maxBytes': 1024 * 1025 * 50,
+            'backupCount': 10,
         }
     },
-    "root": {"level": "INFO", "handlers": ["console"]},
+    "root": {"level": "INFO", "handlers": ["console", "file"]},
+    "loggers": {
+        "django.request": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+        "django.security.DisallowedHost": {
+            "level": "ERROR",
+            "handlers": ["file"],
+            "propagate": True,
+        },
+    },
 }
 
 # django-allauth
@@ -299,3 +324,8 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+STATSD_HOST = 'localhost'
+STATSD_PORT = 8125
+STATSD_PREFIX = None
+STATSD_MAXUDPSIZE = 512
+STATSD_IPV6 = False

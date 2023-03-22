@@ -1,9 +1,14 @@
+# Python Imports
+import logging
+
 # Rest framework imports
 from rest_framework.response import Response
 from rest_framework.utils.serializer_helpers import ReturnDict
 
+logger = logging.getLogger(__name__)
 
-def response(status: bool, message: str, status_code: int, data=None, headers=None, show_data=False):
+
+def response(status: bool, message: str, status_code: int, data=None, headers=None, show_data=False, log_level="error"):
     """
     Customize the response for better information delivery.
 
@@ -16,6 +21,11 @@ def response(status: bool, message: str, status_code: int, data=None, headers=No
     """
     if headers is None:
         headers = {}
+
+    if log_level == "error":
+        logger.error("{} - {}".format(message, status_code))
+    elif log_level == "info":
+        logger.info("{} - {}".format(message, status_code))
 
     message = message if type(message) in [ReturnDict, list] else {"message": message}
 
