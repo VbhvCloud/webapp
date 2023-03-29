@@ -236,6 +236,25 @@ class ProductGetView(generics.RetrieveUpdateDestroyAPIView):
             # Check if the requesting user is the owner of the Product
             if not product.owner_user == request.user:
                 return response(False, "You are not allowed to delete this product's data", status.HTTP_403_FORBIDDEN)
+            
+            # Deleting images related to product
+            # Extract the object keys
+            keys = [obj['s3_bucket_path'] for obj in ProductImage.objects.filter(product=product).values("s3_bucket_path")]
+
+            # Delete the objects in batches of up to 1000
+            batches = [keys[i:i+1000] for i in range(0, len(keys), 1000)]
+            use_profile = environ.Env().bool("USE_PROFILE", default=False)
+
+            
+            try:
+                s3 = boto3.Session(profile_name='dev').client('s3') if use_profile else boto3.client("s3")
+                logger.error("Deleting all images from s3 realted to the image")
+                for batch in batches:
+                    delete_params = {'Bucket': environ.Env().str("S3_BUCKET"), 'Delete': {'Objects': [{'Key': obj_key} for obj_key in batch]}}
+                    s3.delete_objects(**delete_params)
+            except Exception as e:
+                logger.error("Couldn't delete Images from S3, deleteing product only : {}".format(str(e)))
+
 
             # Delete the Product from the database
             logger.info("Deleting product")
