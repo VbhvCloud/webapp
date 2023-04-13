@@ -102,6 +102,8 @@ jobs:
 
     - name: Create new Launch Template version
       run: |
+        echo $latest_ami
+        echo $version_number
         aws ec2 create-launch-template-version --launch-template-name asg_launch_config  --launch-template-data "ImageId=$latest_ami" --source-version $version_number
     
     - name: Autoscaling group instance refresh
