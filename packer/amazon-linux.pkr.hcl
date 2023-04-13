@@ -50,9 +50,13 @@ variable "environment" {
   default = "dev"
 }
 
+locals {
+  timestamp = regex_replace(timestamp(), "[- TZ:]", "")
+}
+
 source "amazon-ebs" "webapp-ami" {
   profile       = "dev"
-  ami_name      = "${var.ami_name}"
+  ami_name      = "${var.ami_name}-${local.timestamp}"
   ami_users     = "${var.ami_users}"
   instance_type = "${var.instance_type}"
   region        = "${var.region}"
@@ -60,7 +64,7 @@ source "amazon-ebs" "webapp-ami" {
   ssh_username  = "${var.ssh_username}"
   subnet_id     = "${var.subnet_id}"
   tags = {
-    Name        = "${var.ami_name}"
+    Name        = "${var.ami_name}-${local.timestamp}"
     Environment = "${var.environment}"
   }
   vpc_id = "${var.vpc_id}"
