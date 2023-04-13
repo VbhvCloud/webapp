@@ -92,6 +92,8 @@ jobs:
 
     - name: Get latest AMI ID
       run: |
+        aws --version
+
         latest_ami=$(aws ec2 describe-images --executable-users self --query 'sort_by(Images, &CreationDate)[-1].ImageId' --output text)
         echo "Latest AMI ID: $latest_ami"
 
