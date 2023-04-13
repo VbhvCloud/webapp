@@ -93,7 +93,7 @@ jobs:
     - name: Get latest AMI ID
       run: |
 
-        aws autoscaling describe-images --executable-users self
+        aws ec2 describe-images --executable-users self
         aws --version
 
         latest_ami=$(aws ec2 describe-images --executable-users self --query 'sort_by(Images, &CreationDate)[-1].ImageId' --output text)
