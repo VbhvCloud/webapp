@@ -94,13 +94,10 @@ jobs:
     - name: Get latest AMI ID
       run: |
 
-        aws ec2 describe-images --executable-users self
-        aws --version
-
-        latest_ami=$(aws ec2 describe-images --executable-users self --query 'sort_by(Images, &CreationDate)[-1].ImageId' --output text)
+        export latest_ami=$(aws ec2 describe-images --executable-users self --query 'sort_by(Images, &CreationDate)[-1].ImageId' --output text)
         echo "Latest AMI ID: $latest_ami"
 
-        version_number=$(aws ec2 describe-launch-template-versions --launch-template-name asg_launch_config --query 'sort_by(LaunchTemplateVersions, &VersionNumber)[-1].VersionNumber' --output text)
+        export version_number=$(aws ec2 describe-launch-template-versions --launch-template-name asg_launch_config --query 'sort_by(LaunchTemplateVersions, &VersionNumber)[-1].VersionNumber' --output text)
         echo "Latest AMI version: $version_number"
 
     - name: Create new Launch Template version
