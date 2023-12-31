@@ -477,7 +477,7 @@ def send_to_sns_topic(image_path, image_name, status, message, user_email):
     use_profile = environ.Env().bool("USE_PROFILE", default=False)
 
     # Create an SNS client
-    sns_client = boto3.Session(profile_name='jenkins').client('sns', region_name=aws_region) if use_profile else boto3.client('sns', region_name=aws_region)
+    sns_client = boto3.Session(profile_name='dev').client('sns', region_name=aws_region) if use_profile else boto3.client('sns', region_name=aws_region)
 
     # Message to be sent to the SNS topic
     notification = json.dumps({
