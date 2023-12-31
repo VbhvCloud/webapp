@@ -11,6 +11,8 @@ POSTGRES_PORT ?= 5432
 POSTGRES_DB ?= webapp
 S3_BUCKET ?= test
 DATABASE_URL?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)
+AWS_REGION ?= us-east-1
+SNS_TOPIC_ARN ?= test
 
 # =============================================================================
 

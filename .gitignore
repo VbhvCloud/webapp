@@ -316,3 +316,4 @@ webapp/media/
 .pytest_cache/
 db.sqlite3
 *.pkrvars.hcl
+.env
