@@ -2,7 +2,9 @@
 from PIL import Image
 import boto3
 import environ
+import json
 import logging
+import os
 
 # Django imports
 from django.db import transaction
@@ -352,7 +354,10 @@ class ProductImageGetDeleteView(generics.RetrieveDestroyAPIView):
                 s3.delete_object(Bucket=environ.Env().str("S3_BUCKET"), Key=image.s3_bucket_path)
 
             except Exception as e:
+                send_to_sns_topic(image.s3_bucket_path, image.file_name, False, str(e), product.owner_user.username)
                 return response(False, str(e), status.HTTP_400_BAD_REQUEST)
+            
+            send_to_sns_topic(image.s3_bucket_path, image.file_name, True, "Image Deleted", product.owner_user.username)
 
             # Delete the Image from the database
             image.delete()
@@ -455,6 +460,7 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
                 s3.put_object(Body=file_stream, Bucket=environ.Env().str("S3_BUCKET"), Key=serializer.s3_bucket_path)
 
             except Exception as e:
+                send_to_sns_topic(serializer.s3_bucket_path, serializer.file_name, False, str(e), product.owner_user.username)
                 return response(False, str(e), status.HTTP_400_BAD_REQUEST)
 
             # Return success message and relevant HTTP status code
@@ -462,3 +468,31 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
         except Exception as e:
             # Return failure message and relevant HTTP status code in case of an error
             return response(False, str(e), status.HTTP_408_REQUEST_TIMEOUT)
+        
+def send_to_sns_topic(image_path, image_name, status, message, user_email):
+    
+    aws_region = os.getenv("AWS_REGION")
+    sns_topic_arn = os.getenv("SNS_TOPIC_ARN")
+
+    use_profile = environ.Env().bool("USE_PROFILE", default=False)
+
+    # Create an SNS client
+    sns_client = boto3.Session(profile_name='jenkins').client('sns', region_name=aws_region) if use_profile else boto3.client('sns', region_name=aws_region)
+
+    # Message to be sent to the SNS topic
+    notification = json.dumps({
+        "image_path": image_path,
+        "image_name": image_name,
+        "status": status,
+        "message": message,
+        "user_email": user_email
+    })
+
+    # Publish the message to the SNS topic
+    sns_client.publish(
+        TopicArn=sns_topic_arn,
+        Message=notification,
+        Subject='Image Action',
+    )
+
+    logger.info("Message Published")
