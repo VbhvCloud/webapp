@@ -9,6 +9,7 @@ packer {
 
 variable "ami_users" {
   type = list(string)
+  default = ["121760325203"]
 }
 
 variable "region" {
@@ -18,7 +19,7 @@ variable "region" {
 
 variable "source_ami" {
   type    = string
-  default = "ami-0dfcb1ef8550277af"
+  default = "ami-079db87dc4c10ac91"
 }
 
 variable "instance_type" {
@@ -33,12 +34,12 @@ variable "ssh_username" {
 
 variable "subnet_id" {
   type    = string
-  default = "subnet-096d56e8c34dd55e7"
+  default = "subnet-0a93ec48d64f72a6e"
 }
 
 variable "vpc_id" {
   type    = string
-  default = "vpc-0a4dc05ee10ccc4d1"
+  default = "vpc-05f960177bbda4d46"
 }
 
 variable "ami_name" {
