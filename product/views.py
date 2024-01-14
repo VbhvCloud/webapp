@@ -462,6 +462,8 @@ class ProductImageGetPostView(generics.ListCreateAPIView):
             except Exception as e:
                 send_to_sns_topic(serializer.s3_bucket_path, serializer.file_name, False, str(e), product.owner_user.username)
                 return response(False, str(e), status.HTTP_400_BAD_REQUEST)
+            
+            send_to_sns_topic(serializer.s3_bucket_path, serializer.file_name, True, "Image Uploaded", product.owner_user.username)
 
             # Return success message and relevant HTTP status code
             return response(True, "Image Uploaded successfully", status.HTTP_201_CREATED, data, log_level="info")
